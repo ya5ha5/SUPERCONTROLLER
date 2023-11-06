@@ -7,3 +7,5 @@ VERSION 0.08 is the first prototype.
 ELECTRONICS folder contains electronics.
 3D PRINTED FILES folder contains 3D printed files.
 ENCLOSURE contains enclosures.
+
+<img width="699" alt="3D renders of enclosure" src="https://github.com/ya5ha5/SUPERCONTROLLER/assets/28617707/bb36f938-b69c-49ba-9e56-05dfac40c259">
