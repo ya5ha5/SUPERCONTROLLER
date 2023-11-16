@@ -1,28 +1,40 @@
-#include "MIDIcontroller.h"
 #include "MIDIUSB.h"
 
-byte MIDIchannel = 5;
-const int potPin = A0;  // Change this to the ANALOG pin you want to use
+const int numPots = 5;
+const int potPins[] = {A0, A1, A2, A3, A4};
 
-// Pot parameters are: pin, CC number, KILL switch enabled
-// When KILL is enabled, separate CC messages (with a different number) will be sent
-// when you turn the pot all the way down and when you start turning it up again.
-// Simply omit the "KILL" argument if you don't want that.
-MIDIpot myPot(potPin, 22, KILL);
-
-// OPTIONAL: use outputRange() to limit the min/max MIDI output values
-// myPot.outputRange(12, 90);
-
-void setup(){
+void controlChange(byte channel, byte control, byte value) {
+  midiEventPacket_t event = {0x0B, 0xB0 | channel, control, value};
+  MidiUSB.sendMIDI(event);
 }
 
-void loop(){
-  myPot.send();
+void setup() {
+  Serial.begin(115200);
 
+  // Set the analog pins as inputs
+  for (int i = 0; i < numPots; i++) {
+    pinMode(potPins[i], INPUT);
+  }
+}
 
-// This prevents crashes that happen when incoming usbMIDI is ignored.
-  while(MIDIusb.read()){}
+void loop() {
+  for (int i = 0; i < numPots; i++) {
+    // Read the analog value from the potentiometer
+    int potValue = analogRead(potPins[i]);
 
-// Also uncomment this if compiling for standard MIDI
-//  while(MIDI.read()){}
+    // Map the pot value (0-1023) to the CC value range (0-127)
+    byte ccValue = map(potValue, 0, 1023, 0, 127);
+
+    // Send the Control Change message over MIDI USB
+    controlChange(0, i, ccValue);
+
+    // Print values to Serial Monitor (optional)
+    Serial.print("Pot ");
+    Serial.print(i + 1);
+    Serial.print(": ");
+    Serial.println(ccValue);
+  }
+
+  // Delay to avoid flooding MIDI with messages
+  delay(10);
 }
